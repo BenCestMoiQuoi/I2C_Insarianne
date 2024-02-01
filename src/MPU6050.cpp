@@ -17,7 +17,7 @@
  * 
  */
 
-#include "INSARIANNE.h"
+#include "I2C_Insarianne.h"
 
 
 #define MPU_ADDR 0x68

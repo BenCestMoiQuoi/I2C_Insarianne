@@ -2,7 +2,7 @@
 
 #define ALTITUDE_BASE 85
 
-BMP085 bmp;
+BMP180 bmp;
 
 void Transfert_Info(){
     bmp.read_sensor();

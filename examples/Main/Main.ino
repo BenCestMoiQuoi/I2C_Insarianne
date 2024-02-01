@@ -39,7 +39,7 @@ File myFile;
 #define SD_pin 5
 
 MPU6050 mpu;
-BMP085 bmp;
+BMP180 bmp;
 
 /*  Declare the variables  */
 

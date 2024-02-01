@@ -1,7 +1,7 @@
 /*!
  * @file INSARIANNE.h
  *
- * This is a library for the BMP085 Barometric Pressure + Temp
+ * This is a library for the BMP180 Barometric Pressure + Temp
  * sensor and the MUP6050 accelerometer, gyroscopique and temperature sensor
  *
  * These displays use I2C to communicate, 2 pins are required to
@@ -16,7 +16,7 @@
 #include <Wire.h>
 
 
-#define VERSION_LIB "1.1.7"
+#define VERSION_LIB "1.0.0"
 
 
 class I2C {
@@ -37,10 +37,10 @@ class I2C {
 };
 
 
-class BMP085 : private I2C
+class BMP180 : private I2C
 {
   public:
-    BMP085();
+    BMP180();
 
     bool begin(void);
 

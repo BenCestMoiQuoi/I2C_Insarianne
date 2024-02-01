@@ -1,6 +1,6 @@
 #include <INSARIANNE.h>
 
-BMP085 bmp;
+BMP180 bmp;
 MPU6050 mpu;
 
 void setup() {

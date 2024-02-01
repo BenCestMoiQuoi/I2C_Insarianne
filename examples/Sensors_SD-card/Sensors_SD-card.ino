@@ -4,7 +4,7 @@
 
 # define _BV(n) (1<<n)
 
-BMP085 bmp;
+BMP180 bmp;
 MPU6050 mpu;
 
 File myFile;

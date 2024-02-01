@@ -16,7 +16,7 @@
  * 
  */
 
-#include "INSARIANNE.h"
+#include "I2C_Insarianne.h"
 
 
 I2C::I2C(TwoWire *theWire) {
