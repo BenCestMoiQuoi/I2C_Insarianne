@@ -1,4 +1,4 @@
-#include <INSARIANNE.h>
+#include <I2C_Insarianne.h>
 
 BMP180 bmp;
 MPU6050 mpu;

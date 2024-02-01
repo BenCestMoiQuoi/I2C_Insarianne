@@ -1,4 +1,4 @@
-#include <INSARIANNE.h>
+#include <I2C_Insarianne.h>
 
 MPU6050 mpu;
 

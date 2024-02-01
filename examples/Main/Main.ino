@@ -2,8 +2,8 @@
 Programme Arduino
 Nom : Main.ino
 Auteur : Roche Corentin
-Version : 4
-Date : 20/01/2023
+Version : 5
+Date : 01/02/2023
 
 Programme principale du project
 INSARIANNE 1
@@ -11,7 +11,7 @@ INSARIANNE 1
 */
 
 #include <Servo.h>
-#include <INSARIANNE.h>
+#include <I2C_Insarianne.h>
 #include <SD.h>
 
 #define _BV(n) (1<<n)
