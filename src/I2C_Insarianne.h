@@ -16,24 +16,24 @@
 #include <Wire.h>
 
 
-#define VERSION_LIB "1.0.0"
+#define VERSION_LIB "1.0.1"
 
 
 class I2C {
   protected:
-    I2C(TwoWire *theWire = &Wire);
+    I2C(TwoWire *theWire = &Wire, HardwareSerial *theSer = &Serial);
     virtual void begin(uint8_t address);
 
-    bool write(uint8_t *data, size_t len, bool stop = true, \
-               uint8_t *reg_data = nullptr, size_t reg_len = 0);
+    bool write(uint8_t data, uint8_t reg_data);
     uint8_t read8(uint8_t reg);
     uint16_t read16(uint8_t reg);
     bool read_n(uint8_t reg, uint8_t data[], int n);
     bool write_bits(uint8_t data, uint8_t reg, uint8_t bits, uint8_t shift);
     uint8_t read_bits(uint8_t reg, uint8_t bits, uint8_t shift);
-  
+
     uint8_t _addr;
     TwoWire *_wire;
+    HardwareSerial *_ser;
 };
 
 
@@ -70,12 +70,12 @@ class MPU6050 : private I2C
 
     bool begin();
     bool begin(uint8_t para_gyr, uint8_t para_acc);
-    void read_sensor(void);
+    bool read_sensor(void);
 
-    void read_acce(void);
-    void read_gyro(void);
-    void read_temp(void);
-    
+    bool read_acce(void);
+    bool read_gyro(void);
+    bool read_temp(void);
+
     void Set_gyro_scale(float new_scale);
     void Set_accel_scale(float new_scale);
     bool Set_param_register(uint8_t val, uint8_t reg);
@@ -85,7 +85,14 @@ class MPU6050 : private I2C
     uint8_t Get_param_register(uint8_t reg);
     uint8_t Get_param_register(uint8_t reg, uint8_t bits, uint8_t shift);
 
+    void SetOffset_zero(void);
+    void CalcOffset(void);
+
+    uint8_t test(void);
+
     float temperature, gyroX, gyroY, gyroZ, accX, accY, accZ;
+    float accXoffset, accYoffset, accZoffset;
+    float gyroXoffset, gyroYoffset, gyroZoffset;
 
   private:
     int _sensorID_tem = 0x650, _sensorID_acc = 0x651, _sensorID_gyr = 0x652;

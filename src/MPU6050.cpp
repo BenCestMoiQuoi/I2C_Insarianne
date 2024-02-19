@@ -33,6 +33,8 @@
 #define MPU6050_GYRO_OUT 0x43   ///< Gyroscope data register
 #define MPU6050_TEMP_OUT 0x41     ///< Temperature data register
 #define MPU6050_ACCEL_OUT 0x3B  ///< Accelerometer data register
+#define MPU6050_FIFO 0x23 ///< FIFO register, to know wich sensor can comunicate
+#define MPU6050_PWR_MGMT_1 0x6B
 
 #define MPU6050_FSYNC_OUT_DISABLED 0b000
 #define MPU6050_FSYNC_OUT_TEMP 0b001
@@ -61,50 +63,93 @@
 #define MPU6050_BAND_10_HZ 0b101  ///< 10 Hz
 #define MPU6050_BAND_5_HZ 0b110   ///< 5 H
 
+#define CALIB_OFFSET_NB_MES 10
+
 
 MPU6050::MPU6050() : I2C() {
     _addr = MPU_ADDR;
 }
 
 bool MPU6050::begin(uint8_t para_gyr, uint8_t para_acc) {
-    if(!write(MPU6050_FSYNC_OUT_DISABLED, 1, true, MPU6050_SMPLRT_DIV, 1) ||
-       !write_bits(para_gyr, MPU6050_GYRO_CONFIG, 2, 3) ||
-       !write_bits(para_acc, MPU6050_ACCEL_CONFIG, 2, 3))
-            return false;
 
-    switch(read_bits(0x1B, 2, 3)) {
-        case 0b00:
-          gyro_scale = 131; break;
-        case 0b01:
-          gyro_scale = 65.5; break;
-        case 0b10:
-          gyro_scale = 32.8; break;
-        case 0b11:
-          gyro_scale = 16.4; break;
-        default:
-          return false;
+    write(0x01, MPU6050_PWR_MGMT_1);
+    write(0x00, MPU6050_SMPLRT_DIV);
+    write(0x00, MPU6050_CONFIG);
+
+    write_bits(para_gyr, MPU6050_GYRO_CONFIG, 2, 3);
+    write_bits(para_acc, MPU6050_ACCEL_CONFIG, 2, 3);
+    
+    switch(read_bits(MPU6050_GYRO_CONFIG, 2, 3)) {
+      case 0b00:
+        gyro_scale = 131; break;
+      case 0b01:
+        gyro_scale = 65.5; break;
+      case 0b10:
+        gyro_scale = 32.8; break;
+      case 0b11:
+        gyro_scale = 16.4; break;
+      default:
+        return false;
     }
 
-      switch(read_bits(0x1C, 2, 3)) {
-        case 0b00:
-          accel_scale = 16384; break;
-        case 0b01:
-          accel_scale = 8192; break;
-        case 0b10:
-          accel_scale = 4096; break;
-        case 0b11:
-          accel_scale = 2048; break;
-        default:
-          return false;
+    switch(read_bits(MPU6050_ACCEL_CONFIG, 2, 3)) {
+      case 0b00:
+        accel_scale = 16384; break;
+      case 0b01:
+        accel_scale = 8192; break;
+      case 0b10:
+        accel_scale = 4096; break;
+      case 0b11:
+        accel_scale = 2048; break;
+      default:
+        return false;
     }
+    SetOffset_zero();
+    CalcOffset();
+
     return true;
 }
 
-bool MPU6050::begin(void) {
-    return begin(MPU6050_RANGE_2_G, MPU6050_RANGE_500_DEG);
+void MPU6050::CalcOffset(void) {
+
+  float ag[6] = {0,0,0,0,0,0}; // 3*acc, 3*gyro
+  
+  for(int i = 0; i < CALIB_OFFSET_NB_MES; i++){
+    read_acce(); read_gyro();
+
+    ag[0] += accX;
+    ag[1] += accY;
+    ag[2] += accZ;
+    ag[3] += gyroX;
+    ag[4] += gyroY;
+    ag[5] += gyroZ;
+	  delay(1); // wait a little bit between 2 measurements
+  }
+  
+  accXoffset = ag[0] / CALIB_OFFSET_NB_MES;
+  accYoffset = ag[1] / CALIB_OFFSET_NB_MES;
+  accZoffset = ag[2] / CALIB_OFFSET_NB_MES;
+
+  gyroXoffset = ag[3] / CALIB_OFFSET_NB_MES;
+  gyroYoffset = ag[4] / CALIB_OFFSET_NB_MES;
+  gyroZoffset = ag[5] / CALIB_OFFSET_NB_MES;
 }
 
-void MPU6050::read_sensor(void) {
+void MPU6050::SetOffset_zero(void){
+  accXoffset = 0;
+  accYoffset = 0;
+  accZoffset = 0;
+  gyroXoffset = 0;
+  gyroYoffset = 0;
+  gyroZoffset = 0;
+}
+
+
+bool MPU6050::begin(void) {
+    return begin(MPU6050_RANGE_2_G, MPU6050_RANGE_250_DEG);
+}
+
+bool MPU6050::read_sensor(void) {
     uint8_t buffer[14];
 
     if (!read_n(MPU6050_ACCEL_OUT, buffer, 14)) 
@@ -118,23 +163,23 @@ void MPU6050::read_sensor(void) {
 
     rawGyroX = buffer[8] << 8 | buffer[9];
     rawGyroY = buffer[10] << 8 | buffer[11];
-    rawGyroY = buffer[12] << 8 | buffer[13];
+    rawGyroZ = buffer[12] << 8 | buffer[13];
 
 
     temperature = (rawTemp / 340.0) + 36.53;
 
-    accX = ((float)rawAccX) / accel_scale;
-    accY = ((float)rawAccY) / accel_scale;
-    accZ = ((float)rawAccZ) / accel_scale;
+    accX = (((float)rawAccX) / accel_scale)-accXoffset;
+    accY = (((float)rawAccY) / accel_scale)-accYoffset;
+    accZ = (((float)rawAccZ) / accel_scale)-accZoffset;
 
-    gyroX = ((float)rawGyroX) / gyro_scale;
-    gyroY = ((float)rawGyroY) / gyro_scale;
-    gyroZ = ((float)rawGyroZ) / gyro_scale;
+    gyroX = (((float)rawGyroX) / gyro_scale)-gyroXoffset;
+    gyroY = (((float)rawGyroY) / gyro_scale)-gyroYoffset;
+    gyroZ = (((float)rawGyroZ) / gyro_scale)-gyroZoffset;
 
     return true;
 }
 
-void MPU6050::read_acce(void) {
+bool MPU6050::read_acce(void) {
     uint8_t buffer[6];
 
     if (!read_n(MPU6050_ACCEL_OUT, buffer, 6)) 
@@ -144,10 +189,14 @@ void MPU6050::read_acce(void) {
     rawAccY = buffer[2] << 8 | buffer[3];
     rawAccZ = buffer[4] << 8 | buffer[5];
 
+    accX = (((float)rawAccX) / accel_scale)-accXoffset;
+    accY = (((float)rawAccY) / accel_scale)-accYoffset;
+    accZ = (((float)rawAccZ) / accel_scale)-accZoffset;
+
     return true;
 }
 
-void MPU6050::read_gyro(void) {
+bool MPU6050::read_gyro(void) {
     uint8_t buffer[6];
 
     if (!read_n(MPU6050_GYRO_OUT, buffer, 6)) 
@@ -157,19 +206,19 @@ void MPU6050::read_gyro(void) {
     rawGyroY = buffer[2] << 8 | buffer[3];
     rawGyroY = buffer[4] << 8 | buffer[5];
 
-    gyroX = ((float)rawGyroX) / gyro_scale;
-    gyroY = ((float)rawGyroY) / gyro_scale;
-    gyroZ = ((float)rawGyroZ) / gyro_scale;
+    gyroX = (((float)rawGyroX) / gyro_scale)-gyroXoffset;
+    gyroY = (((float)rawGyroY) / gyro_scale)-gyroYoffset;
+    gyroZ = (((float)rawGyroZ) / gyro_scale)-gyroZoffset;
 
     return true;
 }
 
-void MPU6050::read_temp(void) {
+bool MPU6050::read_temp(void) {
     uint8_t buffer[2];
 
     if (!read_n(MPU6050_TEMP_OUT, buffer, 2)) 
         return false;
-    
+
     rawTemp = buffer[0] << 8 | buffer[1];
 
     temperature = (rawTemp / 340.0) + 36.53;
@@ -186,7 +235,7 @@ void MPU6050::Set_accel_scale(float new_scale){
 }
 
 bool MPU6050::Set_param_register(uint8_t val, uint8_t reg) {
-    return write(val, 1, true, reg, 1);
+    return write(val, reg);
 }
 
 bool MPU6050::Set_param_register_bits(uint8_t val, uint8_t reg, uint8_t bits, uint8_t shift){
@@ -207,4 +256,14 @@ uint8_t MPU6050::Get_param_register(uint8_t reg) {
 
 uint8_t MPU6050::Get_param_register(uint8_t reg, uint8_t bits, uint8_t shift) {
     return read_bits(reg, bits, shift);
+}
+
+uint8_t MPU6050::test(){
+  uint8_t reg = 0x01;
+  uint8_t data = 0xF8;
+
+  //write(data, reg);
+
+
+  return read8(reg);
 }

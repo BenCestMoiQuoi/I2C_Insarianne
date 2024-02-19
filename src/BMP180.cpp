@@ -88,7 +88,7 @@ void BMP180::Set_SLP(float altitude_base) {
 }
 
 void BMP180::Temperature(void) {
-    write(BMP180_READTEMPCMD, 1, true, BMP180_CONTROL, 1);
+    //write(BMP180_READTEMPCMD, 1, true, BMP180_CONTROL, 1);
     UT = read16(BMP180_TEMPDATA);
     
     x1 = (UT - (int32_t)ac6) * ((int32_t)ac5) >> 15;
@@ -99,7 +99,7 @@ void BMP180::Temperature(void) {
 }
 
 void BMP180::Pressure(void) {
-    write(BMP180_READPRESSURECMD + (oversampling << 6), 1, true, BMP180_CONTROL, 1);
+    //write(BMP180_READPRESSURECMD + (oversampling << 6), 1, true, BMP180_CONTROL, 1);
     
     if (oversampling == BMP180_ULTRALOWPOWER)
         delay(5);

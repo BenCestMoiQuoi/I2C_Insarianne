@@ -78,6 +78,7 @@ void Init_Timer(){
   
 
   sei(); //Enable interrupt
+  
   // Init variable timer
   timer_ms = 0;
   timer_info = 0;
