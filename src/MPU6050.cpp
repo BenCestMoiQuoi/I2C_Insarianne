@@ -63,7 +63,7 @@
 #define MPU6050_BAND_10_HZ 0b101  ///< 10 Hz
 #define MPU6050_BAND_5_HZ 0b110   ///< 5 H
 
-#define CALIB_OFFSET_NB_MES 10
+#define CALIB_OFFSET_NB_MES 20
 
 
 MPU6050::MPU6050() : I2C() {
@@ -104,7 +104,6 @@ bool MPU6050::begin(uint8_t para_gyr, uint8_t para_acc) {
       default:
         return false;
     }
-    SetOffset_zero();
     CalcOffset();
 
     return true;
@@ -112,27 +111,29 @@ bool MPU6050::begin(uint8_t para_gyr, uint8_t para_acc) {
 
 void MPU6050::CalcOffset(void) {
 
+  SetOffset_zero();
+
   float ag[6] = {0,0,0,0,0,0}; // 3*acc, 3*gyro
   
   for(int i = 0; i < CALIB_OFFSET_NB_MES; i++){
-    read_acce(); read_gyro();
+    read_sensor();
 
-    ag[0] += accX;
-    ag[1] += accY;
-    ag[2] += accZ;
-    ag[3] += gyroX;
-    ag[4] += gyroY;
-    ag[5] += gyroZ;
+    ag[0] += accX / CALIB_OFFSET_NB_MES;
+    ag[1] += accY / CALIB_OFFSET_NB_MES;
+    ag[2] += accZ / CALIB_OFFSET_NB_MES;
+    ag[3] += gyroX / CALIB_OFFSET_NB_MES;
+    ag[4] += gyroY / CALIB_OFFSET_NB_MES;
+    ag[5] += gyroZ / CALIB_OFFSET_NB_MES;
 	  delay(1); // wait a little bit between 2 measurements
   }
   
-  accXoffset = ag[0] / CALIB_OFFSET_NB_MES;
-  accYoffset = ag[1] / CALIB_OFFSET_NB_MES;
-  accZoffset = ag[2] / CALIB_OFFSET_NB_MES;
+  accXoffset = ag[0];
+  accYoffset = ag[1];
+  accZoffset = ag[2];
 
-  gyroXoffset = ag[3] / CALIB_OFFSET_NB_MES;
-  gyroYoffset = ag[4] / CALIB_OFFSET_NB_MES;
-  gyroZoffset = ag[5] / CALIB_OFFSET_NB_MES;
+  gyroXoffset = ag[3];
+  gyroYoffset = ag[4];
+  gyroZoffset = ag[5];
 }
 
 void MPU6050::SetOffset_zero(void){
