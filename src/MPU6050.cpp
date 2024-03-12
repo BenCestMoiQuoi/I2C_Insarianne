@@ -46,9 +46,9 @@
 #define MPU6050_FSYNC_OUT_ACCEL_Z 0b111
 
 #define MPU6050_RANGE_2_G 0b00  ///< +/- 2g (default value)
-#define MPU6050_RANGE_4_G = 0b01  ///< +/- 4g
-#define MPU6050_RANGE_8_G = 0b10  ///< +/- 8g
-#define MPU6050_RANGE_16_G = 0b11 ///< +/- 16g
+#define MPU6050_RANGE_4_G 0b01  ///< +/- 4g
+#define MPU6050_RANGE_8_G 0b10  ///< +/- 8g
+#define MPU6050_RANGE_16_G 0b11 ///< +/- 16g
 
 #define MPU6050_RANGE_250_DEG 0b00  ///< +/- 250 deg/s (default value)
 #define MPU6050_RANGE_500_DEG 0b01  ///< +/- 500 deg/s
@@ -147,7 +147,7 @@ void MPU6050::SetOffset_zero(void){
 
 
 bool MPU6050::begin(void) {
-    return begin(MPU6050_RANGE_2_G, MPU6050_RANGE_250_DEG);
+    return begin(MPU6050_RANGE_8_G, MPU6050_RANGE_500_DEG);
 }
 
 bool MPU6050::read_sensor(void) {

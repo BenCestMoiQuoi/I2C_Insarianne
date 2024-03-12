@@ -99,7 +99,7 @@ void BMP180::Temperature(void) {
 }
 
 void BMP180::Pressure(void) {
-    //write(BMP180_READPRESSURECMD + (oversampling << 6), 1, true, BMP180_CONTROL, 1);
+    write(BMP180_READPRESSURECMD + (oversampling << 6), BMP180_CONTROL);
     
     if (oversampling == BMP180_ULTRALOWPOWER)
         delay(5);
