@@ -5,7 +5,7 @@ Auteur : Roche Corentin
 Version : 5
 Date : 01/02/2023
 
-Programme principale du project
+Programme principal du project
 INSARIANNE 1
 
 */
