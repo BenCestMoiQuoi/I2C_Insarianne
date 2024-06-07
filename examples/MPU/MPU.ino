@@ -7,13 +7,13 @@ void Transfert_Info(){
 
     Serial.print("Accéleration X : ");
     Serial.print(mpu.accX);
-    Serial.println(" m/s^2,");
+    Serial.println(" g,");
     Serial.print("Accéleration Y : ");
     Serial.print(mpu.accY);
-    Serial.println(" m/s^2,");
+    Serial.println(" g,");
     Serial.print("Accéleration Z : ");
     Serial.print(mpu.accZ);
-    Serial.println(" m/s^2,");
+    Serial.println(" g,");
     Serial.print("Rotation X : ");
     Serial.print(mpu.gyroX);
     Serial.println(" rad/s,");
