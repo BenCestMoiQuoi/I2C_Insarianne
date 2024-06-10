@@ -106,7 +106,7 @@ void Init_Vol(){
   servo_bas.write(0);
 
   servo_haut.attach(Pin_Servo_Haut);
-  servo_haut.write(180);
+  servo_haut.write(0);
 
   Etat_vol = false;
 }
@@ -134,10 +134,14 @@ void Verif_Sol(){
     Etat_sol = 1;
     write_LED_Sol();
     servo_haut.write(0);
+    servo_bas.write(0);
   }
-  if (digitalRead(Switch_pin_sol_1) && Etat_sol == 1) servo_haut.write(180);
+  if (digitalRead(Switch_pin_sol_1) && Etat_sol == 1) {
+    servo_haut.write(90);
+    servo_bas.write(90);
+  }
   if (Etat_sol == 1 && digitalRead(Switch_pin_sol_1) && !digitalRead(Switch_pin_sol_2) 
-        && !digitalRead(Jack_pin) && servo_haut.read()==180){
+        && !digitalRead(Jack_pin) && servo_haut.read()==90 && servo_bas.read()==90){
     Etat_sol = 2;
     write_LED_Sol();
   }
@@ -151,6 +155,8 @@ void Verif_Sol(){
   }
   if (Etat_sol == 3 && digitalRead(Jack_pin)){
     Etat_vol = true;
+    Etat_sol = 0;
+    write_LED_Sol(); 
   }
 }
 
@@ -165,11 +171,7 @@ void Ouverture_porte(){
   timer_ms = 0;
   while (timer_ms < 500) {
     servo_haut.write(0);
-  }
-  timer_ms = 0;
-  while (timer_ms < 500) {
-    servo_haut.write(0);
-    servo_bas.write(180);
+    servo_bas.write(0);
   }
 }
 
@@ -207,11 +209,12 @@ void Vol(){
   Fonction de la fusée lorsqu'elle est en vol.
   */
   timer_ms = 0;
-  while (timer_ms < Val_Timer) void;
+  //while (timer_ms < Val_Timer) {
+  //  Serial.print("Lancement");
+  //  Serial.println(timer_ms);
+  //}
+  delay(3000);
   Ouverture_porte();
-  while(1){
-    void;
-  }
 }
 
 void write_LED_Sol(){
@@ -242,7 +245,7 @@ void setup() {
   Serial.begin(9600);
 
   Init_Sol();
-  Init_Timer();
+  //Init_Timer();
   Init_Vol();
 
 
@@ -258,9 +261,9 @@ void setup() {
   Vol();
 }
 void loop() {}
-
+/*
 ISR(TIMER0_COMPA_vect){    //This  is the interrupt request
   timer_ms++;
   count_ms++;
   timer_info++;
-}
+}*/

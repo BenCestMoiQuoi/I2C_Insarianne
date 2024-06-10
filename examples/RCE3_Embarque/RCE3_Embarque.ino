@@ -7,7 +7,7 @@ Date : 20/01/2023
 
 
 */
-#include <INSARIANNE.h>
+#include <I2C_Insarianne.h>
 #include <Adafruit_BMP085.h>
 
 #include <LoRa.h>
