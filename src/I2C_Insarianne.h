@@ -19,7 +19,7 @@
 #include <Adafruit_I2CDevice.h>
 
 
-#define VERSION_LIB "1.1"
+#define VERSION_LIB "1.0.2"
 
 
 class I2C {
