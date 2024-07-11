@@ -174,4 +174,62 @@ private:
   void (*_onTxDone)();
 };
 
+
+#define BMP085_DEBUG 0 //!< Debug mode
+
+#define BMP085_I2CADDR 0x77 //!< BMP085 I2C address
+
+#define BMP085_ULTRALOWPOWER 0 //!< Ultra low power mode
+#define BMP085_STANDARD 1      //!< Standard mode
+#define BMP085_HIGHRES 2       //!< High-res mode
+#define BMP085_ULTRAHIGHRES 3  //!< Ultra high-res mode
+#define BMP085_CAL_AC1 0xAA    //!< R   Calibration data (16 bits)
+#define BMP085_CAL_AC2 0xAC    //!< R   Calibration data (16 bits)
+#define BMP085_CAL_AC3 0xAE    //!< R   Calibration data (16 bits)
+#define BMP085_CAL_AC4 0xB0    //!< R   Calibration data (16 bits)
+#define BMP085_CAL_AC5 0xB2    //!< R   Calibration data (16 bits)
+#define BMP085_CAL_AC6 0xB4    //!< R   Calibration data (16 bits)
+#define BMP085_CAL_B1 0xB6     //!< R   Calibration data (16 bits)
+#define BMP085_CAL_B2 0xB8     //!< R   Calibration data (16 bits)
+#define BMP085_CAL_MB 0xBA     //!< R   Calibration data (16 bits)
+#define BMP085_CAL_MC 0xBC     //!< R   Calibration data (16 bits)
+#define BMP085_CAL_MD 0xBE     //!< R   Calibration data (16 bits)
+
+#define BMP085_CONTROL 0xF4         //!< Control register
+#define BMP085_TEMPDATA 0xF6        //!< Temperature data register
+#define BMP085_PRESSUREDATA 0xF6    //!< Pressure data register
+#define BMP085_READTEMPCMD 0x2E     //!< Read temperature control register value
+#define BMP085_READPRESSURECMD 0x34 //!< Read pressure control register value
+
+/*!
+ * @brief Main BMP085 class
+ */
+class BMP180 {
+public:
+  BMP180();
+  bool begin(uint8_t mode = BMP085_ULTRAHIGHRES, TwoWire *wire = &Wire);
+  void read_sensor(void);
+  void readTemperature(void);
+  void readPressure(void);
+  void readSealevelPressure(float altitude_meters = 0);
+  void readAltitude(float sealevelPressure = 101325); // std atmosphere
+  uint16_t readRawTemperature(void);
+  uint32_t readRawPressure(void);
+
+  long Pressure, SeaLevelPressure;
+  float Temperature, Altitude;
+
+private:
+  int32_t computeB5(int32_t UT);
+  uint8_t read8(uint8_t addr);
+  uint16_t read16(uint8_t addr);
+  void write8(uint8_t addr, uint8_t data);
+
+  Adafruit_I2CDevice *i2c_dev;
+  uint8_t oversampling;
+
+  int16_t ac1, ac2, ac3, b1, b2, mb, mc, md;
+  uint16_t ac4, ac5, ac6;
+};
+
 #endif 
